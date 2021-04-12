@@ -1,13 +1,13 @@
 # https://stackoverflow.com/questions/54827918/get-list-of-running-windows-applications-using-python
-import subprocess
-# cmd = 'WMIC PROCESS get Caption,Commandline,Processid'
-cmd = 'WMIC PROCESS get Caption,Processid'
-# cmd = 'powershell "gps | where {$_.MainWindowTitle }'
-proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-for line in proc.stdout:
-    print(line.decode().rstrip())
+# import subprocess
+# # cmd = 'WMIC PROCESS get Caption,Commandline,Processid'
+# cmd = 'WMIC PROCESS get Caption,Processid'
+# # cmd = 'powershell "gps | where {$_.MainWindowTitle }'
+# proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+# for line in proc.stdout:
+#     print(line.decode().rstrip())
 
-exit()
+# exit()
 
 # https://www.geeksforgeeks.org/python-get-list-of-running-processes/
 # import wmi
