@@ -52,10 +52,10 @@
 
 
 # https://www.codegrepper.com/code-examples/python/python+get+list+of+all+open+windows
-from pywinauto import Desktop
+# from pywinauto import Desktop
 
-windows = Desktop(backend="uia").windows()
-print([w.window_text() for w in windows])
+# windows = Desktop(backend="uia").windows()
+# print([w.window_text() for w in windows])
 
 print()
 print()
