@@ -20,16 +20,16 @@
 #     def tearDown(self):
 #         self.driver.close()
 
-# if __name__ == "__main__":
-#     unittest.main()
+# # if __name__ == "__main__":
+# unittest.main()
 
 
-from selenium import webdriver
-driver = webdriver.Chrome(executable_path="/home/vyas20/Downloads/chromedriver_linux64/chromedriver")
+# from selenium import webdriver
+# driver = webdriver.Chrome(executable_path="/home/vyas20/Downloads/chromedriver_linux64/chromedriver")
 
-# driver.get("https://selenium.dev")
-print(driver.current_url)
-print(driver.title)
+# # driver.get("https://selenium.dev")
+# print(driver.current_url)
+# print(driver.title)
 
 
 # from selenium import webdriver

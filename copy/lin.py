@@ -9,12 +9,12 @@
 
 # pgrep -af python #CL
 
-# import psutil
-
-# def check_process_status(process_name):
 #     """
 #     Return status of process based on process name.
 #     """
+# import psutil
+
+# def check_process_status(process_name):
 #     process_status = [ proc for proc in psutil.process_iter() if proc.name() == process_name ]
 #     if process_status:
 #         for current_process in process_status:
@@ -22,8 +22,8 @@
 #     else:
 #         print("Process name not valid", process_name)
 
-# def main():
-#     check_process_status(chrome)
+# # def main():
+# check_process_status("chrome")
 
 
 
@@ -110,8 +110,8 @@
 #     XFree((char*) children);
 # }
 
-# def main():
-#     enumerateWindows()
+# # def main():
+# enumerateWindows()
 
 
 
@@ -153,7 +153,9 @@
 
 
 #######################3
-
+'''
+gives list of processes [only names] from title bar
+'''
 # from ewmh import EWMH
 
 # window_manager_manager = EWMH()
@@ -165,6 +167,9 @@
 
 ########
 
+'''
+gives list of processes [only names] from title bar
+'''
 # from Xlib.display import Display
 # from Xlib.X import AnyPropertyType
 
@@ -191,7 +196,9 @@
 ############
 
 
-
+'''
+gives geometry [dimnesions and coordinates] of current window already 
+'''
 # import gi
 # gi.require_version('Wnck', '3.0')
 # from gi.repository import Wnck
@@ -214,6 +221,9 @@
 ############
 
 #!/usr/bin/python
+'''
+gives geometry [dimnesions and coordinates] of all open windows already 
+'''
 
 # import gi
 # gi.require_version('Wnck', '3.0')
@@ -233,6 +243,11 @@
 # screen = None
 # Wnck.shutdown()
 
+############
+
+'''
+windows only
+'''
 
 # import pygtk
 # pygtk.require('2.0')
@@ -243,9 +258,19 @@
 # print(lis)
 
 ###########3
-
+'''
+processes and their children
+'''
 # $ xwininfo -tree -root
+########
+'''
+gives window IDs
+'''
 # xprop -root|grep ^_NET_CLIENT_LIST
+#########
+'''
+gives geometry of windows, inspected by Window ID
+'''
 # xwininfo -id 0x2000007
 
 
@@ -275,25 +300,25 @@
 
 
 # import selenium
-from selenium import webdriver
-# import configreader
-# from webdriver_manager.chrome import ChromeDriverManager
-driver = webdriver.Chrome(executable_path="/home/vyas20/Downloads/chromedriver_linux64/chromedriver")
+# from selenium import webdriver
+# # import configreader
+# # from webdriver_manager.chrome import ChromeDriverManager
+# driver = webdriver.Chrome(executable_path="/home/vyas20/Downloads/chromedriver_linux64/chromedriver")
 
-# # options = webdriver.ChromeOptions()
-# driver = webdriver.Chrome(ChromeDriverManager().install())
+# # # options = webdriver.ChromeOptions()
+# # driver = webdriver.Chrome(ChromeDriverManager().install())
 
-# lis = driver.get_all_windows()
+# # lis = driver.get_all_windows()
 
-# for i in lis :
-#     driver.switch_to(i)
-#     tit = driver.current_url()
-#     print(tit)
+# # for i in lis :
+# #     driver.switch_to(i)
+# #     tit = driver.current_url()
+# #     print(tit)
 
-for handle in driver.window_handles:
-    print('ues')
-    driver.switch_to.window(handle)
-    print(driver.current_url)
+# for handle in driver.window_handles:
+#     print('ues')
+#     driver.switch_to.window(handle)
+#     print(driver.current_url)
 
 # browser = webdriver.Chrome()
 
