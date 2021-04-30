@@ -1,3 +1,4 @@
+from os.path import expanduser
 import shutil
 import os
 from subprocess import Popen, PIPE, STDOUT
@@ -6,11 +7,26 @@ import socket
 from colorama import init
 from termcolor import colored
 
-def format_path(path: str, usr: str) -> str:
+def shorten_path(path: str, usr: str) -> str:
     if path.startswith(f"/home/{usr}"):
-        new_path = path.replace(f"/home/{usr}", "~")
+        shortened_path = path.replace(f"/home/{usr}", "~")
+        return shortened_path
+    else:
+        return path
 
-    return new_path
+def expand_path(path: str) -> str:
+    expanded_path = os.path.expanduser(path)
+    if os.path.exists(expanded_path):
+        expanded_path = os.path.abspath(expanded_path)
+        if os.path.exists(expanded_path):
+            return expanded_path
+        else:
+            print(colored("[ERROR]", "red")+f" [{expanded_path}] doesn't exist.")
+            return None
+    else:
+        print(colored("[ERROR]", "red")+f" [{expanded_path}] doesn't exist.")
+        return None
+
 
 # Courtesy: https://stackoverflow.com/a/1094933/15609488
 def human(num, suffix='B'):
@@ -84,7 +100,8 @@ def copy_cmd(src: str, dst: str, indent: int):
                     print(" "*indent+"Copied"+colored(f"[\"{src}\"]", "yellow")+" into "+colored(f"[\"{dst}\"]", "green"))
                 else: 
                     print(" "*indent+"Ok. Nevermind then.")
-
+                return
+            
         shutil.copy(src, dst)
         print(" "*indent+"Copied "+colored(f"[\"{src}\"]", "yellow")+" into "+colored(f"[\"{dst}\"]", "green"))
 
@@ -112,40 +129,90 @@ def copy_handler(cmd: str, bg: bool):
     dst = files[-1]
     src = files[:-1]
 
-    # check if dst is dir
-    if not os.path.isdir(dst):
-        print("ERROR: The destination is not a directory")
+    dst = expand_path(dst)
+    if dst==None:
         return
+    if os.path.exists(dst):
+        if os.path.isdir(dst):
+            pass
+        else:
+            print(colored("[ERROR]", "red")+" The destination path is a file.")
+            exit(1)
+    
+    else:
+        os.makedirs(dst)
+        print(colored("[INFO]", "yellow")+" The destination folder has been created.")
 
     # copy the srces one by one
     for s in src:
-        copy_cmd(s, dst, 0)
+        if os.path.exists(s):
+            s = expand_path(s)
+            if s==None:
+                continue
+            copy_cmd(s, dst, 0)
+        else:
+            print(colored("[INFO]", "yellow")+f" [{s}] - no such file .")
+
 
     print()
     return
 
+# TODO: Make it verbose
 def move_handler(cmd: str, bg: bool):
     """
     Handle the move command
     """
-    pass
+    cmd = cmd.strip()
+    out, err = Popen(cmd, shell=True).communicate()
+    # print(out.decode())
+    return
 
 def change_dir_handler(cmd: str, bg: bool):
     """
     Handle the change directory command
     """
-    pass
+    # get rid of the command name
+    cmd = cmd.strip().split()
+
+    if len(cmd)==1:
+        os.chdir(expand_path("~"))
+
+    else:
+        if len(cmd)>2:
+            print(colored("[ERROR]", "red")+" Too many arguments to cd.")
+        else:
+            dst = expand_path(cmd[1])
+            if dst==None:
+                return
+            os.chdir(dst)
+    return
 
 def make_dir_handler(cmd: str, bg: bool):
     """
     Handle the make directory command
     """
-    pass
+    cmd = cmd.strip().split()
+    if len(cmd)==1:
+        print(colored("[ERROR]", "red")+" No operand to make dir.")
+    else:
+        for c in cmd[1:]:
+            dst = expand_path(c)
+            if dst==None:
+                print(colored("[ERROR]", "yellow")+f" Invalid request [{c}].")
+            else:
+                try:
+                    os.makedirs(dst)
+                except FileExistsError:
+                    print(colored("[INFO]", "yellow")+f" Dir already present [{dst}].")
+    return
 
 def list_handler(cmd: str, bg: bool):
     """
     Handle the list files command
     """
+    cmd = cmd.strip()
+    out, err = Popen(cmd, shell=True).communicate()
+    # print(out.decode())
     pass
 
 def listener(cmd: str, bg: bool):
@@ -166,7 +233,7 @@ machine = socket.gethostname()
 while(True):
 
     # get the current directory for the prompt
-    pwd = format_path(os.getcwd(), user)
+    pwd = shorten_path(os.getcwd(), user)
 
     # print the user and machine
     print(colored(f"{user}@{machine}", "yellow", attrs=["bold"])+":", end='')
@@ -175,9 +242,13 @@ while(True):
     print(colored(f"{pwd}", "cyan", attrs=["bold"])+colored("$ ", "green", attrs=["bold"]), end='')
 
     # get command
-    cmd = input()
-    print(cmd.strip().split())
-
+    try:
+        cmd = input()
+    # print(cmd.strip().split())
+    except KeyboardInterrupt:
+        print("\nExiting.")
+        exit(0)
+    
     cmd = cmd.strip()
     if cmd.startswith("exit"):
         print("Exiting")
@@ -189,7 +260,10 @@ while(True):
         run_in_background=True
         cmd = cmd.replace("&", "").strip()
 
-    if cmd.startswith("ls"):
+    if "|" in cmd:
+        out, err = Popen(cmd, shell=True, stderr = STDOUT, stdout = PIPE).communicate()
+        print(out)
+    elif cmd.startswith("ls"):
         list_handler(cmd, run_in_background)
     elif cmd.startswith("cd"):
         change_dir_handler(cmd, run_in_background)
@@ -206,25 +280,12 @@ while(True):
             print("Cannot run carryOn module in the background.")
             print("Starting it now...")
         carryOn(cmd)
-
-    # proc = Popen(cmd.strip().split(), stderr=STDOUT, stdout=PIPE)
-
-    # out, err = proc.communicate()
-
-    # if err is None:
-    #     print(out.decode())
-    # else:
-    #     print("An error has occurred.")
-    #     print(err)
+    else:
+        out, err = Popen(cmd, shell=True, stderr = STDOUT, stdout = PIPE).communicate()
 
     # handle simple commands
 
-    # ls
-    # cd
-    # cp
-    # mv
-    # mkdir
-    # exit
+
     # carryon
     # listen
     # handle exceptions
