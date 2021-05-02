@@ -44,7 +44,7 @@ class FileServer(chunk_pb2_grpc.FileServerServicer):
 
         class Servicer(chunk_pb2_grpc.FileServerServicer):
             def __init__(self):
-                self.tmp_file_name = '/tmp/server_tmp'
+                self.tmp_file_name = './server_save'
 
             def upload(self, request_iterator, context):
                 save_chunks_to_file(request_iterator, self.tmp_file_name)
