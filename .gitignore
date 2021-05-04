@@ -4,3 +4,7 @@
 **/*.jpg
 **/*.mkv
 **/*.mp4
+
+## ignore virtual env
+
+**/env
