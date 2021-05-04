@@ -1,0 +1,6 @@
+## ignore files being transferred for testing
+
+**/*.png
+**/*.jpg
+**/*.mkv
+**/*.mp4
