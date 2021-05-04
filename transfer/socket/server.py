@@ -18,6 +18,8 @@ print(f"Connected with {address}")
 listOfFiles = []
 listOfFiles.append("/home/vyas20/OS/lab3/B18CSE020/readme.txt")
 # listOfFiles.append("/home/vyas20/Pictures/1.png")
+listOfFiles.append("/home/vyas20/Pictures/3.png")
+listOfFiles.append("/home/vyas20/Pictures/4.png")
 listOfFiles.append("/home/vyas20/Pictures/2.png")
 listOfFiles.append("/home/vyas20/Downloads/bb.mkv")
 
@@ -52,6 +54,8 @@ for file in listOfFiles :
         file_data = f.read(1024102424)
         clientsocket.send(file_data)
         f.close()
+
+        temp = clientsocket.recv(1024).decode()
 
 
 

@@ -50,6 +50,7 @@ for i in range(numFiles):
     f.write(file_data)    
     f.close()
 
+    s.send(str("temp").encode())
 
 
     print(f"The file {file} received")
