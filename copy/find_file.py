@@ -168,7 +168,7 @@ for i1, (id, name) in enumerate(zip(pids_to_transfer, processes_to_transfer)):
 
     if len(files_found)>0:
         print("Files in use: ")
-        for i, f in enumerate(files_found):
+        for i, f in enumerate(set(files_found)):
             print(f"[{i}]: {f}")
 
         f_idx = input("Enter the indices of the file to transfer: ")
