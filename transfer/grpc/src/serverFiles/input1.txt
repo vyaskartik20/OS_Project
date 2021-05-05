@@ -1,4 +1,0 @@
-2
-S : A a | b
-A : A c | S d | ?
-a b c

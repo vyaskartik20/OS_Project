@@ -1,0 +1,10 @@
+{
+    "0": {
+        "process": "code",
+        "file": "TransferredFiles/3.png"
+    },
+    "1": {
+        "process": "gedit",
+        "file": "TransferredFiles/readme.txt"
+    }
+}

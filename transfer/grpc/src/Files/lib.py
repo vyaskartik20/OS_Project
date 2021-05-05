@@ -1,10 +1,11 @@
 import os
 from concurrent import futures
-
+import sys
+sys.path.append('..')
 import grpc
 import time
 
-import chunk_pb2, chunk_pb2_grpc
+from Files import chunk_pb2, chunk_pb2_grpc
 
 CHUNK_SIZE = 1024 * 1024  # 1MB
 
