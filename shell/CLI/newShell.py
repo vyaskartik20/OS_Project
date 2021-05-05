@@ -54,32 +54,27 @@ def human_time(diff):
     return res
 
 def copy_cmd(src: str, dst: str, indent: int):
-    # if it's a directory, ask for recursive copy
     if os.path.isdir(src):
+    # if it's a directory, ask for recursive copy
         resp = input(" "*indent+f"{src} is a directory. Do you want to copy all its contents? (y/n) ")
         if resp.strip().lower() == 'y' or \
             resp.strip().lower() == 'yes':
-            try:
-                dir_name = src.split("/")[-1]
-            except:
-                dir_name = src
+            src = src.rstrip("/")
+            _, dir_name = os.path.split(src)
             os.makedirs(os.path.join(dst, dir_name), exist_ok=True)
             for f in os.listdir(src):
-                copy_cmd(os.path.join(src, f), os.path.join(dst, dir_name), indent+1)
+                copy_cmd(os.path.join(src, f), os.path.join(dst, dir_name), indent+2)
         else:
             print(" "*indent+"Ok. Nevermind then.")
     
     else:
         # if it's not a directory, check for conflict
-        try:
-            src_file_name = src.split("/")[-1]
-        except:
-            src_file_name = src
+        _, src_file_name = os.path.split(src)
         
         for file in os.listdir(dst):
             if file==src_file_name:
 
-                print(" "*indent+"A file by the same name is already present.")
+                print(" "*indent+f"A file by the same name [{file}] is already present.")
                 print(" "*indent+f"Src file size: [{human(os.path.getsize(src))}]")
                 print(" "*indent+f"Dst file size: [{human(os.path.getsize(os.path.join(dst, file)))}]")
                 
@@ -92,12 +87,12 @@ def copy_cmd(src: str, dst: str, indent: int):
                 if src_time>dst_time:
                     print(" "*indent+"Src file is "+colored("newer", "green")+f" by {diff}")
                 else:
-                    print(" "*indent+"Src file is "+colored("newer", "orange")+f" by {diff}")
+                    print(" "*indent+"Src file is "+colored("older", "yellow")+f" by {diff}")
                 resp2 = input(" "*indent+"Want to "+colored("overwrite", "red")+"? (y/n) ")
                 if resp2.strip().lower() == 'y' or \
                     resp2.strip().lower() == 'yes':
                     shutil.copy(src, dst)
-                    print(" "*indent+"Copied"+colored(f"[\"{src}\"]", "yellow")+" into "+colored(f"[\"{dst}\"]", "green"))
+                    print(" "*indent+"Copied"+colored(f" [\"{src}\"]", "yellow")+" into "+colored(f"[\"{dst}\"]", "green"))
                 else: 
                     print(" "*indent+"Ok. Nevermind then.")
                 return
@@ -119,8 +114,12 @@ def copy_handler(cmd: str, bg: bool):
     files = []
     options_done = False
     for tok in cmd:
-        if tok.startswith("-") and not options_done:
-            options.append(tok)
+        if tok.startswith("-"): 
+            if not options_done:
+                options.append(tok)
+            else:
+                print(colored("[ERROR]", "red")+" Options allowed only when grouped together")
+                exit(1)
         else:
             options_done = True
             files.append(tok)
@@ -129,16 +128,13 @@ def copy_handler(cmd: str, bg: bool):
     dst = files[-1]
     src = files[:-1]
 
-    dst = expand_path(dst)
-    if dst==None:
-        return
+    dst = dst.rstrip('/')
     if os.path.exists(dst):
         if os.path.isdir(dst):
             pass
         else:
             print(colored("[ERROR]", "red")+" The destination path is a file.")
             exit(1)
-    
     else:
         os.makedirs(dst)
         print(colored("[INFO]", "yellow")+" The destination folder has been created.")
@@ -146,13 +142,10 @@ def copy_handler(cmd: str, bg: bool):
     # copy the srces one by one
     for s in src:
         if os.path.exists(s):
-            s = expand_path(s)
-            if s==None:
-                continue
-            copy_cmd(s, dst, 0)
+            if expand_path(s):
+                copy_cmd(s, dst, 0)
         else:
             print(colored("[INFO]", "yellow")+f" [{s}] - no such file .")
-
 
     print()
     return
@@ -196,14 +189,11 @@ def make_dir_handler(cmd: str, bg: bool):
         print(colored("[ERROR]", "red")+" No operand to make dir.")
     else:
         for c in cmd[1:]:
-            dst = expand_path(c)
-            if dst==None:
-                print(colored("[ERROR]", "yellow")+f" Invalid request [{c}].")
-            else:
-                try:
-                    os.makedirs(dst)
-                except FileExistsError:
-                    print(colored("[INFO]", "yellow")+f" Dir already present [{dst}].")
+            try:
+                os.makedirs(c)
+                print(colored("[INFO]", "green")+f" Dir {c} created")
+            except FileExistsError:
+                print(colored("[INFO]", "yellow")+f" Dir already present [{c}].")
     return
 
 def list_handler(cmd: str, bg: bool):
@@ -246,12 +236,12 @@ while(True):
         cmd = input()
     # print(cmd.strip().split())
     except KeyboardInterrupt:
-        print("\nExiting.")
+        print(colored("\nExiting.", "yellow"))
         exit(0)
     
     cmd = cmd.strip()
     if cmd.startswith("exit"):
-        print("Exiting")
+        print(colored("Exiting", "yellow"))
         exit(0)
 
     # check if background run is needed
