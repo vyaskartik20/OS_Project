@@ -7,6 +7,12 @@ import socket
 from colorama import init
 from termcolor import colored
 
+from util.server import main as serverUtil
+from util.client import main as clientUtil
+from util.openProcess import main as openProcessUtil
+from util.find_file import main as findFileUtil
+from util.voice import main as voiceUtil
+
 def shorten_path(path: str, usr: str) -> str:
     if path.startswith(f"/home/{usr}"):
         shortened_path = path.replace(f"/home/{usr}", "~")
@@ -209,12 +215,25 @@ def listener(cmd: str, bg: bool):
     """
     The voice commands module
     """
+
+    voiceUtil()
+
     pass
+
 
 def carryOn(cmd: str):
     """
     carryOn module: pick up where you left off!
     """
+
+    inpChoice = input('Enter S at source machine and R at recipient machine ')
+
+    if(inpChoice == 'S') :
+        findFileUtil()
+        serverUtil()
+    elif(inpChoice == "R"):
+        clientUtil()
+        openProcessUtil()
     pass
 
 user = getpass.getuser()
