@@ -37,6 +37,7 @@ def human(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
 def human_time(diff):
+    diff = abs(diff)
     res = ""
     days = diff // 86400
     hours = diff // 3600 % 24
@@ -73,7 +74,6 @@ def copy_cmd(src: str, dst: str, indent: int):
         
         for file in os.listdir(dst):
             if file==src_file_name:
-
                 print(" "*indent+f"A file by the same name [{file}] is already present.")
                 print(" "*indent+f"Src file size: [{human(os.path.getsize(src))}]")
                 print(" "*indent+f"Dst file size: [{human(os.path.getsize(os.path.join(dst, file)))}]")
@@ -95,6 +95,7 @@ def copy_cmd(src: str, dst: str, indent: int):
                     print(" "*indent+"Copied"+colored(f" [\"{src}\"]", "yellow")+" into "+colored(f"[\"{dst}\"]", "green"))
                 else: 
                     print(" "*indent+"Ok. Nevermind then.")
+                print()
                 return
             
         shutil.copy(src, dst)
@@ -155,9 +156,53 @@ def move_handler(cmd: str, bg: bool):
     """
     Handle the move command
     """
+
+    # the quick and dirty approach
     cmd = cmd.strip()
     out, err = Popen(cmd, shell=True).communicate()
     # print(out.decode())
+   
+    # # get rid of the command name
+    # cmd = cmd.strip().split()[1:]
+
+    # options = []
+    # files = []
+    # options_done = False
+    # for tok in cmd:
+    #     if tok.startswith("-"): 
+    #         if not options_done:
+    #             options.append(tok)
+    #         else:
+    #             print(colored("[ERROR]", "red")+" Options allowed only when grouped together")
+    #             exit(1)
+    #     else:
+    #         options_done = True
+    #         files.append(tok)
+
+    # # separate out the source and destination files
+    # dst = files[-1]
+    # src = files[:-1]
+
+    # dst = dst.rstrip('/')
+    # if os.path.exists(dst):
+    #     if os.path.isdir(dst):
+    #         pass
+    #     else:
+    #         print(colored("[ERROR]", "red")+" The destination path is a file.")
+    #         exit(1)
+    # else:
+    #     os.makedirs(dst)
+    #     print(colored("[INFO]", "yellow")+" The destination folder has been created.")
+
+    # # copy the srces one by one
+    # for s in src:
+    #     if os.path.exists(s):
+    #         if expand_path(s):
+    #             copy_cmd(s, dst, 0)
+    #     else:
+    #         print(colored("[INFO]", "yellow")+f" [{s}] - no such file .")
+
+    # print()
     return
 
 def change_dir_handler(cmd: str, bg: bool):
@@ -221,62 +266,61 @@ user = getpass.getuser()
 machine = socket.gethostname()
 
 while(True):
-
-    # get the current directory for the prompt
-    pwd = shorten_path(os.getcwd(), user)
-
-    # print the user and machine
-    print(colored(f"{user}@{machine}", "yellow", attrs=["bold"])+":", end='')
-
-    # print the current path
-    print(colored(f"{pwd}", "cyan", attrs=["bold"])+colored("$ ", "green", attrs=["bold"]), end='')
-
-    # get command
     try:
+        # get the current directory for the prompt
+        pwd = shorten_path(os.getcwd(), user)
+
+        # print the user and machine
+        print(colored(f"{user}@{machine}", "yellow", attrs=["bold"])+":", end='')
+
+        # print the current path
+        print(colored(f"{pwd}", "cyan", attrs=["bold"])+colored("$ ", "green", attrs=["bold"]), end='')
+
+        # get command
         cmd = input()
-    # print(cmd.strip().split())
+        # print(cmd.strip().split())
+        
+        cmd = cmd.strip()
+        if cmd.startswith("exit"):
+            print(colored("Exiting", "yellow"))
+            exit(0)
+
+        # check if background run is needed
+        run_in_background = False
+        if cmd.endswith("&"):
+            run_in_background=True
+            cmd = cmd.replace("&", "").strip()
+
+        if "|" in cmd:
+            out, err = Popen(cmd, shell=True, stderr = STDOUT, stdout = PIPE).communicate()
+            print(out)
+        elif cmd.startswith("ls"):
+            list_handler(cmd, run_in_background)
+        elif cmd.startswith("cd"):
+            change_dir_handler(cmd, run_in_background)
+        elif cmd.startswith("mkdir"):
+            make_dir_handler(cmd, run_in_background)
+        elif cmd.startswith("cp"):
+            copy_handler(cmd, run_in_background)
+        elif cmd.startswith("mv"):
+            move_handler(cmd, run_in_background)
+        elif cmd.startswith("listen"):
+            listener(cmd, run_in_background)
+        elif cmd.startswith("carryon"):
+            if run_in_background==True:
+                print("Cannot run carryOn module in the background.")
+                print("Starting it now...")
+            carryOn(cmd)
+        else:
+            out, err = Popen(cmd, shell=True, stderr = STDOUT, stdout = PIPE).communicate()
+
+        # handle simple commands
+
+
+        # carryon
+        # listen
+        # handle exceptions
     except KeyboardInterrupt:
-        print(colored("\nExiting.", "yellow"))
-        exit(0)
-    
-    cmd = cmd.strip()
-    if cmd.startswith("exit"):
-        print(colored("Exiting", "yellow"))
-        exit(0)
-
-    # check if background run is needed
-    run_in_background = False
-    if cmd.endswith("&"):
-        run_in_background=True
-        cmd = cmd.replace("&", "").strip()
-
-    if "|" in cmd:
-        out, err = Popen(cmd, shell=True, stderr = STDOUT, stdout = PIPE).communicate()
-        print(out)
-    elif cmd.startswith("ls"):
-        list_handler(cmd, run_in_background)
-    elif cmd.startswith("cd"):
-        change_dir_handler(cmd, run_in_background)
-    elif cmd.startswith("mkdir"):
-        make_dir_handler(cmd, run_in_background)
-    elif cmd.startswith("cp"):
-        copy_handler(cmd, run_in_background)
-    elif cmd.startswith("mv"):
-        move_handler(cmd, run_in_background)
-    elif cmd.startswith("listen"):
-        listener(cmd, run_in_background)
-    elif cmd.startswith("carryon"):
-        if run_in_background==True:
-            print("Cannot run carryOn module in the background.")
-            print("Starting it now...")
-        carryOn(cmd)
-    else:
-        out, err = Popen(cmd, shell=True, stderr = STDOUT, stdout = PIPE).communicate()
-
-    # handle simple commands
-
-
-    # carryon
-    # listen
-    # handle exceptions
-
+        # catch all KeyboardInterrupts i.e. Ctrl+c
+        print()
+        continue
